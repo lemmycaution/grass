@@ -42,7 +42,7 @@ command :push do |c|
     
     Grass.cache.flush    
         
-    files.delete_if{|file| file =~ /\/helpers\//}.each do |file|
+    files.keep_if{ |file| file =~ /\/assets|\/contents|\/views/ }.each do |file|
       
       unless File.directory?(file)
         source = Grass::Source.find_or_create_by!(filepath: file)
