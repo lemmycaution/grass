@@ -1,0 +1,7 @@
+$LOAD_PATH.unshift File.expand_path('../', __FILE__)
+load "grass/tasks/db.rake"
+desc "pushes deployed file changes"
+task :deploy do
+  system 'bundle exec grass push'
+end
+task :default => :deploy
