@@ -1,6 +1,6 @@
 # Grass
 
-TODO: Write a gem description
+Yet another ruby framework
 
 ## Installation
 
@@ -18,7 +18,7 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+to create new app : `grass new PATHNAME`
 
 ## Contributing
 
