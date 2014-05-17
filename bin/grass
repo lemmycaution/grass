@@ -1,0 +1,89 @@
+#!/usr/bin/env ruby
+
+
+$stdout.sync = true
+
+require 'commander/import'
+require 'fileutils'
+require 'grass'
+require 'grass/key'
+require 'grass/source'
+    
+# :name is optional, otherwise uses the basename of this executable
+program :name, 'Grass CLI'
+program :version, '0.0.1'
+program :description, 'Grass CLI'
+
+command :new do |c|
+  c.syntax = 'grass new PATH'
+  c.description = 'Creates new Grass app'
+  c.action do |args, options|
+    path = args.first
+    FileUtils.mkdir_p path
+    template_root = "#{Grass.gem_root}/lib/templates"
+    FileUtils.cp_r "#{template_root}/app/.", path
+    ["#{path}/config/database.yml","#{path}/config/cache.yml"].each do |filepath|
+      content = ::File.read(filepath)
+      content.gsub!(/\$app/m,path.split("/").last)
+      content.gsub!(/\$username/m,ENV['USER']||"postgres")    
+      ::File.open(filepath,::File::RDWR){|f| f.truncate(0); f.rewind; f.write(content) }
+    end
+    puts "Grass app created on #{path}"
+  end
+end
+
+command :push do |c|
+
+  c.syntax = 'grass push'
+  c.description = 'creates db objects from files'
+  c.action do |args, options|
+    require "#{Grass.root}/config/grass"    
+    files = Dir.glob("#{Grass.app_root}/**/*")
+    
+    files.delete_if{|file| file =~ /\/helpers\//}.each do |file|
+      
+      unless File.directory?(file)
+        source = Grass::Source.find_or_create_by!(filepath: file)
+        source.raw = File.read(file)
+        source.commit!
+        say "Pushed File: #{source.filepath}"
+      end
+      
+
+              
+    end    
+    Grass.cache.flush    
+  end
+end
+
+command :pull do |c|
+  c.syntax = 'grass pull'
+  c.description = 'Transfers file data'
+  c.option '--from ENV', String, 'source ENV, default production'
+  c.option '--to ENV', String, 'target ENV, default development'  
+  c.action do |args, options|
+    options.default from: 'production', to: 'development'
+    
+    config = YAML.load(ERB.new(File.read('config/database.yml')).result)
+    ActiveRecord::Base.establish_connection config[options.from]
+    files = Grass::Source.all.as_json
+    ActiveRecord::Base.remove_connection
+        
+    ActiveRecord::Base.establish_connection config[options.to]
+    files.each do |file|
+      source = Grass::Source.find_or_initialize_by(filepath: file["filepath"].dup)
+      source.raw = file["raw"]
+      source.filepath = file["filepath"]
+      source.handler = file["handler"]      
+      source.format = file["format"]            
+      source.commit!
+      say "Pulled File: #{source.filepath}"
+    end
+    
+    config = YAML::load(ERB.new(::File.read("#{Grass.root}/config/cache.yml")).result)[options.to]
+    dalli = Dalli::Client.new(config.delete("servers").split(","), config)
+    dalli.flush
+
+  end
+end
+

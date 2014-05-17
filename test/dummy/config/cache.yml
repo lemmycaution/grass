@@ -1,0 +1,23 @@
+development:
+  compress:     true
+  threadsafe:   true
+  namespace:    grass:dummy_development
+  servers:      localhost:11211
+  async:        true
+test:
+  compress:     true
+  threadsafe:   true
+  namespace:    grass:dummy_test
+  servers:      localhost:11211
+  async:        true
+production:
+  compress:     true
+  threadsafe:   true
+  namespace:    grass:dummy_nukleer
+  servers:      <%= ENV['MEMCACHIER_SERVERS'] %>
+  password:     <%= ENV['MEMCACHIER_PASSWORD'] %>
+  username:     <%= ENV['MEMCACHIER_USERNAME'] %>
+  async:        true
+  down_retry_delay: 1
+  socket_timeout: 0.5
+  socket_max_failures: 20

@@ -1,0 +1,2 @@
+web-front: bundle exec ./grass front -c ./config/grass.rb -p $PORT -e ${ENV:-development} -sv
+web-api: bundle exec ./grass api -c ./config/grass.rb -p $PORT -e ${ENV:-development} -sv
