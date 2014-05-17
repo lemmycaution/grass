@@ -8,9 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = Grass::VERSION
   spec.authors       = ["Onur Uyar"]
   spec.email         = ["me@onuruyar.com"]
-  spec.summary       = %q{TODO: Write a short summary. Required.}
-  spec.description   = %q{TODO: Write a longer description. Optional.}
-  spec.homepage      = ""
+  spec.summary       = %q{Yet another ruby framework}
+  spec.homepage      = "http://github.com/lemmycaution/grass"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)
