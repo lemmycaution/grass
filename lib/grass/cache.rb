@@ -1,16 +1,22 @@
 module Grass
   module Cache
     
-    DATA_CACHE_KEYS = %i(language_info country_info params http_host request_path)
-    
     module ClassMethods
+      
+      def data_cache_keys 
+        @@data_cache_keys ||= %i(language_info country_info params http_host request_path)
+      end
+      
+      def data_cache_keys= keys
+        @@data_cache_keys = keys
+      end      
       
       def read_cache cache_key
         JSON.load(Grass.cache.get(cache_key))
       end
       
       def generate_cachekey key_fullpath, data
-        Digest::MD5.hexdigest("#{key_fullpath}_#{data.select{|k,v| DATA_CACHE_KEYS.include?(k)}}")      
+        Digest::MD5.hexdigest("#{key_fullpath}_#{data.select{|k,v| self.data_cache_keys.include?(k)}}")      
       end
       
     end
