@@ -40,6 +40,8 @@ command :push do |c|
     require "#{Grass.root}/config/grass"    
     files = Dir.glob("#{Grass.app_root}/**/*")
     
+    Grass.cache.flush    
+        
     files.delete_if{|file| file =~ /\/helpers\//}.each do |file|
       
       unless File.directory?(file)
@@ -48,11 +50,9 @@ command :push do |c|
         source.commit!
         say "Pushed File: #{source.filepath}"
       end
-      
-
               
     end    
-    Grass.cache.flush    
+
   end
 end
 
@@ -82,7 +82,7 @@ command :pull do |c|
     
     config = YAML::load(ERB.new(::File.read("#{Grass.root}/config/cache.yml")).result)[options.to]
     dalli = Dalli::Client.new(config.delete("servers").split(","), config)
-    dalli.flush
+    dalli.flush    
 
   end
 end

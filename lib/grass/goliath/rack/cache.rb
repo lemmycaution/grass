@@ -9,7 +9,7 @@ module Goliath
       include Goliath::Rack::AsyncMiddleware
     
       def post_process(env, status, headers, body)
-        if body.is_a? String
+        if body.is_a?(String) && (Grass.env == "production" || env.config['enable_cache_for_development'])
           # Generate ETag for body
           etag = etag_for(body)
           

@@ -54,7 +54,7 @@ module Grass
 
       id = get_id
       
-      data = request_data
+      data = id =~ /scripts|styles/ ? {} : request_data
       
       headers = {}
       
@@ -62,6 +62,7 @@ module Grass
 
       # try memcache or render freshly
       if cached_response = Source.read_cache(Source.generate_cachekey(id,data))
+        # puts "----> CACHED!!!"
 
         mime_type, body = cached_response
         headers = {"Content-Type" => mime_type}     
@@ -100,14 +101,14 @@ module Grass
 
     def get_file key
       raise Goliath::Validation::NotFoundError unless source = Source[key].first
-      if Grass.env == "development"
-        source.file.read 
-        source.commit!
-      end
+      # if Grass.env == "development"
+      #   source.file.read 
+      #   source.commit!
+      # end
       source
     end
     
-    def fresh id, data = nil
+    def fresh id, data = {}
       file = get_file(id)
       if file.type == "page"   
         file.render(data) 

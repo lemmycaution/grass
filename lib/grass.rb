@@ -15,7 +15,7 @@ module Grass
     end
   
     def root
-      @@root ||= find_root_with_flag("grass", Dir.pwd).to_s
+      @@root ||= find_root_with_flag("Procfile", Dir.pwd).to_s
     end
 
     def root= root
@@ -50,7 +50,7 @@ module Grass
   private
 
   # i steal this from rails
-  def find_root_with_flag(flag, default=nil)
+  def self.find_root_with_flag(flag, default=nil)
     root_path = self.class.called_from[0]
 
     while root_path && ::File.directory?(root_path) && !::File.exist?("#{root_path}/#{flag}")

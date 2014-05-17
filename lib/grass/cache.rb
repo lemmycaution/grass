@@ -1,14 +1,16 @@
 module Grass
   module Cache
     
+    DATA_CACHE_KEYS = %i(language_info country_info params http_host request_path)
+    
     module ClassMethods
       
       def read_cache cache_key
         JSON.load(Grass.cache.get(cache_key))
       end
       
-      def generate_cachekey keyid, data
-        Digest::MD5.hexdigest("#{keyid}_#{data}")      
+      def generate_cachekey key_fullpath, data
+        Digest::MD5.hexdigest("#{key_fullpath}_#{data.select{|k,v| DATA_CACHE_KEYS.include?(k)}}")      
       end
       
     end
@@ -19,7 +21,7 @@ module Grass
     end
     
     def commit! result = nil
-      clear_cache if precompile?
+      # clear_cache if precompile?
       super(result)
       set_cache if precompile?
       self
@@ -30,21 +32,20 @@ module Grass
     end
 
     def precompile?
-      self.binary.nil? && self.type == "script" || self.type == "style"
+      self.binary.nil? && (self.type == "script" || self.type == "stylesheet")
     end
     
     module_function
     
-    def cache
-      Grass.cache
-    end
-    
     def set_cache
-      cache.set self.class.generate_cachekey(self.keyid,self.data), JSON.dump([self.mime_type, self.read].flatten)
+      Grass.cache.set(
+      self.class.generate_cachekey(self.key.fullpath,self.data), 
+      JSON.dump([self.mime_type, self.read].flatten)
+      )
     end
     
     def clear_cache
-      cache.delete self.class.generate_cachekey(self.keyid,self.data) rescue nil
+      Grass.cache.delete self.class.generate_cachekey(self.key.fullpath,self.data) rescue nil
     end
     
   end

@@ -56,6 +56,10 @@ module Grass
       self.id
     end
     
+    def fullpath
+      @fullpath ||= @dir =~ /pages/ ? "/#{@locale}/#{@dir}/#{@path}" : "/#{@locale}/#{@dir}/#{@path}.#{@format}"
+    end
+    
     private
     
     ##
